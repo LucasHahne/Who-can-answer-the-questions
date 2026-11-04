@@ -1,0 +1,20 @@
+# Question files with answers – never commit (public repo)
+supabase/seed.sql
+supabase/seed.samples.sql
+
+# Local secrets and machine-specific settings
+.env
+.env.*
+.claude/settings.local.json
+
+# OS / editor clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+
+# Dependencies (in case tooling is added later)
+node_modules/
+
+# Project plan – stays local
+PLAN.md

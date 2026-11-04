@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "quiz",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5173", "--bind", "127.0.0.1"],
+      "port": 5173
+    },
+    {
+      "name": "quiz-alt",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5181", "--bind", "127.0.0.1"],
+      "port": 5181,
+      "autoPort": false
+    }
+  ]
+}
