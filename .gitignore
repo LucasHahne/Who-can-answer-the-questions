@@ -18,3 +18,6 @@ node_modules/
 
 # Project plan – stays local
 PLAN.md
+
+# Local MCP config (contains the Supabase project ref)
+.mcp.json
