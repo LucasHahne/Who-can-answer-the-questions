@@ -21,3 +21,7 @@ PLAN.md
 
 # Local MCP config (contains the Supabase project ref)
 .mcp.json
+
+# Code → question overview (contains codes and answers) – stays local
+Code.html
+supabase/seed.jga.sql
