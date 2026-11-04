@@ -17,6 +17,7 @@ create table if not exists public.games (
   reveal_mode          text        not null default 'end'
                                    check (reveal_mode in ('immediate', 'end')),
   timer_seconds        int         check (timer_seconds is null or timer_seconds between 5 and 300),
+  timer_enabled        boolean     not null default true,  -- on/off switch; timer_seconds = duration (30 s if empty)
   fifty_fifty_enabled  boolean     not null default false,
   prize_ladder_enabled boolean     not null default false,
   max_players          int         not null default 50
@@ -27,6 +28,7 @@ create table if not exists public.games (
 -- Added after the first deploy; keeps re-runs on an existing database working.
 alter table public.games add column if not exists max_players int not null default 50
   check (max_players between 1 and 500);
+alter table public.games add column if not exists timer_enabled boolean not null default true;
 
 create unique index if not exists games_code_upper_key on public.games (upper(code));
 
@@ -156,7 +158,8 @@ as $$
 declare
   v_timer int;
 begin
-  select g.timer_seconds into v_timer
+  -- Timer switch: off -> no timer at all; on without a duration -> 30 seconds.
+  select case when g.timer_enabled then coalesce(g.timer_seconds, 30) end into v_timer
   from players p
   join games g on g.id = p.game_id
   where p.id = p_player_id;
@@ -220,6 +223,8 @@ begin
   if not found then
     return;  -- unknown or closed code: zero rows, no error
   end if;
+
+  v_game.timer_seconds := case when v_game.timer_enabled then coalesce(v_game.timer_seconds, 30) end;  -- timer switch
 
   if length(v_name) < 1 or length(v_name) > 30 or v_name ~ '[[:cntrl:]]' then
     raise exception 'NAME_INVALID';
@@ -289,6 +294,7 @@ begin
   end if;
 
   select g.* into v_game from games g where g.id = v_player.game_id;
+  v_game.timer_seconds := case when v_game.timer_enabled then coalesce(v_game.timer_seconds, 30) end;  -- timer switch
   select count(*)::int into v_total from questions q where q.game_id = v_game.id;
 
   perform _sweep_timeout(v_player.id);
@@ -369,6 +375,7 @@ begin
   end if;
 
   select g.* into v_game from games g where g.id = v_player.game_id;
+  v_game.timer_seconds := case when v_game.timer_enabled then coalesce(v_game.timer_seconds, 30) end;  -- timer switch
 
   select pa.* into v_pa from player_answers pa
    where pa.player_id = v_player.id and pa.question_id = p_question_id
@@ -442,6 +449,7 @@ begin
   end if;
 
   select g.* into v_game from games g where g.id = v_player.game_id;
+  v_game.timer_seconds := case when v_game.timer_enabled then coalesce(v_game.timer_seconds, 30) end;  -- timer switch
 
   if not v_game.fifty_fifty_enabled then
     raise exception 'FIFTY_FIFTY_DISABLED';
